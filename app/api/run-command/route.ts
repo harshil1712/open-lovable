@@ -1,62 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Sandbox } from '@e2b/code-interpreter';
-
-// Get active sandbox from global state (in production, use a proper state management solution)
-declare global {
-  var activeSandbox: any;
-}
 
 export async function POST(request: NextRequest) {
   try {
-    const { command } = await request.json();
+    console.log('[run-command] Proxying to Cloudflare Worker...');
     
-    if (!command) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Command is required' 
-      }, { status: 400 });
-    }
+    // Get the request body
+    const body = await request.json();
     
-    if (!global.activeSandbox) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'No active sandbox' 
-      }, { status: 400 });
-    }
+    // Get the Cloudflare Worker URL from environment
+    const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://open-lovable-sandbox.your-subdomain.workers.dev';
     
-    console.log(`[run-command] Executing: ${command}`);
-    
-    const result = await global.activeSandbox.runCode(`
-import subprocess
-import os
-
-os.chdir('/home/user/app')
-result = subprocess.run(${JSON.stringify(command.split(' '))}, 
-                       capture_output=True, 
-                       text=True, 
-                       shell=False)
-
-print("STDOUT:")
-print(result.stdout)
-if result.stderr:
-    print("\\nSTDERR:")
-    print(result.stderr)
-print(f"\\nReturn code: {result.returncode}")
-    `);
-    
-    const output = result.logs.stdout.join('\n');
-    
-    return NextResponse.json({
-      success: true,
-      output,
-      message: 'Command executed successfully'
+    // Proxy the request to the Cloudflare Worker
+    const response = await fetch(`${workerUrl}/sandbox/run-command`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
     });
     
+    if (!response.ok) {
+      throw new Error(`Worker response not ok: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('[run-command] Received response from worker');
+    
+    return NextResponse.json(data);
+
   } catch (error) {
-    console.error('[run-command] Error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: (error as Error).message 
-    }, { status: 500 });
+    console.error('[run-command] Proxy error:', error);
+    
+    return NextResponse.json(
+      { 
+        error: error instanceof Error ? error.message : 'Failed to run command',
+        details: 'Error communicating with Cloudflare Worker'
+      },
+      { status: 500 }
+    );
   }
 }

@@ -2,12 +2,12 @@
 // This file contains all configurable settings for the application
 
 export const appConfig = {
-  // E2B Sandbox Configuration
-  e2b: {
+  // Cloudflare Sandbox Configuration
+  cf: {
     // Sandbox timeout in minutes
     timeoutMinutes: 15,
     
-    // Convert to milliseconds for E2B API
+    // Convert to milliseconds for process management
     get timeoutMs() {
       return this.timeoutMinutes * 60 * 1000;
     },
@@ -21,8 +21,13 @@ export const appConfig = {
     // Time to wait for CSS rebuild (in milliseconds)
     cssRebuildDelay: 2000,
     
-    // Default sandbox template (if using templates)
-    defaultTemplate: undefined, // or specify a template ID
+    // Session management
+    sessionIdPrefix: 'sandbox-',
+    enableSessionPersistence: true,
+    
+    // Process management
+    maxProcesses: 10,
+    processCheckInterval: 5000,
   },
   
   // AI Model Configuration

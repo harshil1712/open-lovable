@@ -1,0 +1,46 @@
+{
+	"name": "open-lovable-sandbox",
+	"compatibility_date": "2025-08-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "src/worker.ts",
+
+	// Container configuration for Cloudflare Sandbox SDK
+	"containers": [
+		{
+			"class_name": "Sandbox",
+			"image": "./Dockerfile"
+		}
+	],
+
+	// Durable Objects for persistent sandbox state
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "Sandbox",
+				"class_name": "Sandbox"
+			}
+		]
+	},
+
+	// Migrations for Durable Objects
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["Sandbox"]
+		}
+	],
+
+	// Environment variables
+	"vars": {
+		"ENVIRONMENT": "development"
+	},
+
+	// KV namespace bindings (if needed for session storage)
+	"kv_namespaces": [
+		{
+			"binding": "SESSION_STORAGE",
+			"id": "your-kv-namespace-id",
+			"preview_id": "your-preview-kv-namespace-id"
+		}
+	]
+}

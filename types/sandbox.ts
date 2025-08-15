@@ -1,4 +1,4 @@
-// Global types for sandbox file management
+// Global types for Cloudflare sandbox file management
 
 export interface SandboxFile {
   content: string;
@@ -12,16 +12,26 @@ export interface SandboxFileCache {
   manifest?: any; // FileManifest type from file-manifest.ts
 }
 
-export interface SandboxState {
-  fileCache: SandboxFileCache | null;
-  sandbox: any; // E2B sandbox instance
-  sandboxData: {
-    sandboxId: string;
-    url: string;
-  } | null;
+export interface CloudflareSandboxData {
+  sandboxId: string;
+  url: string;
+  processId?: string; // For tracking Vite process
+  sessionId?: string; // CF sandbox session ID
 }
 
-// Declare global types
+export interface SandboxState {
+  fileCache: SandboxFileCache | null;
+  sandbox: any; // Cloudflare sandbox instance
+  sandboxData: CloudflareSandboxData | null;
+}
+
+// Cloudflare Worker environment interface
+export interface WorkerEnv {
+  Sandbox: DurableObjectNamespace;
+  SESSION_STORAGE?: KVNamespace;
+}
+
+// Declare global types for legacy compatibility
 declare global {
   var activeSandbox: any;
   var sandboxState: SandboxState;

@@ -18,7 +18,7 @@ npm install
 2. **Add `.env.local`**
 ```env
 # Required
-E2B_API_KEY=your_e2b_api_key  # Get from https://e2b.dev (Sandboxes)
+# E2B replaced with Cloudflare Sandbox SDK - no additional API key needed
 FIRECRAWL_API_KEY=your_firecrawl_api_key  # Get from https://firecrawl.dev (Web scraping)
 
 # Optional (need at least one AI provider)
